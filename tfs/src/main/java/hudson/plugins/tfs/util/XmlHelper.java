@@ -5,6 +5,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,7 +29,24 @@ public class XmlHelper {
 
     private static final XPathFactory XPF = XPathFactory.newInstance();
     private static final DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
+
+    static {
+        String FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+        try {
+            DBF.setFeature(FEATURE, true);
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException("ParserConfigurationException was thrown. The feature '"
+                    + FEATURE + "' is not supported by your XML processor.", e);
+        }
+
+    }
     private static final TransformerFactory TF = TransformerFactory.newInstance();
+
+    static {
+        TF.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        TF.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        TF.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    }
 
     public static String peekValue(final Document doc, final String xpathExpression)
             throws XPathExpressionException {

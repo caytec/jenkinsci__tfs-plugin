@@ -10,6 +10,7 @@ import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -20,11 +21,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Files;
 
 public class XmlHelperTest {
 
     @Test public void peekValue_Document() throws Exception {
         final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        String FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+        try {
+            dbf.setFeature(FEATURE, true);
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException("ParserConfigurationException was thrown. The feature '"
+                    + FEATURE + "' is not supported by your XML processor.", e);
+        }
         final DocumentBuilder db = dbf.newDocumentBuilder();
         final Document doc = db.newDocument();
         // <build>
@@ -56,7 +65,7 @@ public class XmlHelperTest {
         final URL inputUrl = clazz.getResource(resourceBase + "input.xml");
         File tmp = null;
         try {
-            tmp = File.createTempFile("XmlHelperTest", "xml");
+            tmp = Files.createTempFile("XmlHelperTest", "xml").toFile();
             FileUtils.copyURLToFile(inputUrl, tmp);
 
             final String actual = XmlHelper.peekValue(tmp, "/build/timestamp");
@@ -69,6 +78,13 @@ public class XmlHelperTest {
 
     @Test public void pokeValue_Document() throws Exception {
         final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        String FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+        try {
+            dbf.setFeature(FEATURE, true);
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException("ParserConfigurationException was thrown. The feature '"
+                    + FEATURE + "' is not supported by your XML processor.", e);
+        }
         final DocumentBuilder db = dbf.newDocumentBuilder();
         final Document doc = db.newDocument();
         // <build>
@@ -102,7 +118,7 @@ public class XmlHelperTest {
         BufferedReader expectedReader = null, actualReader = null;
 
         try {
-            tmp = File.createTempFile("XmlHelperTest", "xml");
+            tmp = Files.createTempFile("XmlHelperTest", "xml").toFile();
             FileUtils.copyURLToFile(inputUrl, tmp);
 
             XmlHelper.pokeValue(tmp, "/build/timestamp", "42");
